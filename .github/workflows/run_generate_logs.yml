@@ -5,7 +5,7 @@ on:
 
 jobs:
   generate-logs:
-    runs-on: self-hosted  # Uses the self-hosted runner for the October repository
+    runs-on: self-hosted  # Use the self-hosted runner configured for the October repository
 
     steps:
     - name: Checkout repository
