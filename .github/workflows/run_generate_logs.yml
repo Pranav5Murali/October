@@ -25,5 +25,5 @@ jobs:
         pranav@127.0.0.1 '
           echo "Connected to VM" &&
           uname -a &&
-          python3 /home/pranav/actions-runner/_work/October/October/generate_logs.py
+          python3 /home/pranav/actions-runner-October/_work/October/October/generate_logs.py
         '
