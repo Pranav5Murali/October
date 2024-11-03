@@ -24,5 +24,12 @@ jobs:
           -o LogLevel=ERROR \
           pranav@127.0.0.1 'echo "Connected to VM" && uname -a'
 
+      - name: Check File Existence
+        run: |
+          echo "Checking files in the repository..."
+          ls -la
+          ls -la path/to/generate_logs.py  # Adjust path if necessary
+
+
       - name: Logs will generate now
-        run: python3 generate_logs.py
+        run: python3 generate_logs.py  # Adjust path if necessary
