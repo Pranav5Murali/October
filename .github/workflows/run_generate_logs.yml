@@ -1,23 +1,34 @@
-name: Generate Logs on Self-Hosted Runner
+name: Generate Logs on VM
 
 on:
   workflow_dispatch:
 
 jobs:
   generate-logs:
-    runs-on: self-hosted  # Specifies the use of your self-hosted runner
+    runs-on: self-hosted
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
 
+    - name: Install sshpass
+      run: sudo apt-get install sshpass -y
+
+    - name: Verify sshpass installation
+      run: sshpass -V
+
+    - name: Connect and Run Log Generation Script on VM
+      run: |
+        sshpass -p "Test@123" ssh -o StrictHostKeyChecking=no \
+        -o UserKnownHostsFile=/dev/null \
+        -o LogLevel=ERROR \
+        pranav@127.0.0.1 '
+          echo "Connected to VM" &&
+          uname -a &&
+          python3 /home/pranav/actions-runner/_work/Test/Test/generate_logs.py
+        '
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.x'
-        
-    - name: Install psutil (if required)
-      run: pip install psutil
-
-    - name: Run Log Generation Script
-      run: python3 generate_logs.py
