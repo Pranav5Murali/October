@@ -27,8 +27,3 @@ jobs:
           uname -a &&
           python3 /home/pranav/actions-runner/_work/October/October/generate_logs.py
         '
-
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.x'
