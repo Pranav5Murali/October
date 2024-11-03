@@ -5,7 +5,7 @@ on:
 
 jobs:
   generate-logs:
-    runs-on: self-hosted
+    runs-on: self-hosted  # Uses the self-hosted runner for the October repository
 
     steps:
     - name: Checkout repository
@@ -25,7 +25,7 @@ jobs:
         pranav@127.0.0.1 '
           echo "Connected to VM" &&
           uname -a &&
-          python3 /home/pranav/actions-runner/_work/Test/Test/generate_logs.py
+          python3 /home/pranav/actions-runner/_work/October/October/generate_logs.py
         '
 
     - name: Set up Python
