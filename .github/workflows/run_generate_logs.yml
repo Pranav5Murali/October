@@ -1,29 +1,28 @@
-name: Generate Logs on VM
+name: Connect to Ubuntu VM (Self-Hosted Runner)
 
 on:
   workflow_dispatch:
 
 jobs:
-  generate-logs:
-    runs-on: self-hosted  # Use the self-hosted runner configured for the October repository
+  connect-to-vm:
+    runs-on: self-hosted
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Install sshpass
-      run: sudo apt-get install sshpass -y
+      - name: Verify sshpass installation
+        run: sshpass -V
 
-    - name: Verify sshpass installation
-      run: sshpass -V
+      - name: Connect and Run Command on VM
+        env:
+          SSH_PASS: "Test@123"
+        run: |
+          echo "Starting SSH connection..."
+          sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no \
+          -o UserKnownHostsFile=/dev/null \
+          -o LogLevel=ERROR \
+          pranav@127.0.0.1 'echo "Connected to VM" && uname -a'
 
-    - name: Connect and Run Log Generation Script on VM
-      run: |
-        sshpass -p "Test@123" ssh -o StrictHostKeyChecking=no \
-        -o UserKnownHostsFile=/dev/null \
-        -o LogLevel=ERROR \
-        pranav@127.0.0.1 '
-          echo "Connected to VM" &&
-          uname -a &&
-          python3 /home/pranav/actions-runner-October/_work/October/October/generate_logs.py
-        '
+      - name: Logs will generate now
+        run: python3 generate_logs.py
