@@ -5,7 +5,7 @@ on:
 
 jobs:
   connect-to-vm:
-  runs-on: [pranav-VirtualBox, self-hosted, Linux, X64]
+    runs-on: [pranav-VirtualBox, self-hosted, Linux, X64]  # Ensures exact labels are matched
 
     steps:
       - name: Checkout repository
@@ -28,8 +28,7 @@ jobs:
         run: |
           echo "Checking files in the repository..."
           ls -la
-          ls -la path/to/generate_logs.py  # Adjust path if necessary
-
+          ls -la path/to/generate_logs.py  # Adjust this path if necessary
 
       - name: Logs will generate now
-        run: python3 generate_logs.py  # Adjust path if necessary
+        run: python3 path/to/generate_logs.py  # Adjust this path if necessary
