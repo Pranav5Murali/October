@@ -1,52 +1,46 @@
-name: Self-Hosted Runner Test and Python Script Execution
+name: Test Self-Hosted Runner and Generate Logs
 
 on:
   workflow_dispatch:
 
 jobs:
-  connect-to-vm:
-    runs-on: [pranav-VirtualBox, self-hosted, Linux, X64]
-
-    env:
-      SSH_USER: "pranav"
-      SSH_PASS: "Test@123"   # Update this with your actual password if needed
-      SSH_HOST: "127.0.0.1"  # Update if your VM IP is different
-      SSH_PORT: "22"         # Default SSH port
+  # Step 1: Test Self-Hosted Runner
+  test-runner:
+    runs-on: self-hosted
 
     steps:
-      # Step 1: Runner Self-Test
-      - name: Runner Self-Test
+      - name: Test Runner Connection
         run: |
-          echo "Running self-test to ensure runner is working..."
-          echo "Checking Python version:"
-          python3 --version
-          echo "Checking system details:"
-          uname -a
-          echo "Checking available disk space:"
-          df -h
-          echo "Self-test completed successfully!"
+          echo "Testing runner connection..."
+          echo "Runner is working!"
 
-      # Step 2: Checkout Repository
+  # Step 2: Generate Logs with Python Script (Only if Step 1 succeeds)
+  generate-logs:
+    runs-on: [pranav-VirtualBox, self-hosted, Linux, X64]
+    needs: test-runner
+
+    steps:
+      # Step 2.1: Checkout Repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Step 3: Make Python Script Executable
-      - name: Make Python Script Executable
-        run: chmod +x /home/pranav/Documents/generate_logs.py
+      # Step 2.2: Verify Python Installation
+      - name: Verify Python Installation
+        run: python3 --version
 
-      # Step 4: Run Python Script to Generate File
+      # Step 2.3: Run Python Script to Generate File
       - name: Run Python Script
         run: |
           echo "Running generate_logs.py..."
-          python3 /home/pranav/Documents/generate_logs.py
+          python3 generate_logs.py
 
-      # Step 5: Move Generated File to Target Directory
+      # Step 2.4: Move Generated File to /home/pranav
       - name: Move Generated File to /home/pranav
         run: |
           echo "Checking if generated file exists..."
-          if [ -f /home/pranav/Documents/generated_file.txt ]; then
+          if [ -f generated_file.txt ]; then
             echo "File found! Moving to /home/pranav..."
-            mv /home/pranav/Documents/generated_file.txt /home/pranav/
+            mv generated_file.txt /home/pranav/
             echo "File moved successfully to /home/pranav"
           else
             echo "Error: generated_file.txt not found."
