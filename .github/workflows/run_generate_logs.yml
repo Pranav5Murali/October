@@ -11,21 +11,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Verify sshpass installation
-        run: sshpass -V
-
-      - name: Connect and Run Command on VM
-        env:
-          SSH_PASS: ${{ secrets.SSH_PASS }}  # Securely fetch SSH password from GitHub secrets
-          RUNNER_IP: "192.168.1.3"  # Using the IP from your config.env
+      - name: Check Runner IP (Self-Hosted)
         run: |
-          echo "Starting SSH connection..."
-          sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no \
-          -o UserKnownHostsFile=/dev/null \
-          -o LogLevel=ERROR \
-          -o BatchMode=yes \
-          -o ConnectTimeout=5 \
-          pranav@$RUNNER_IP 'echo "Connected to VM" && uname -a'
+          echo "Runner IP: $RUNNER_IP"  # Ensure this matches the value in your config.env
 
       - name: Check File Existence
         run: |
