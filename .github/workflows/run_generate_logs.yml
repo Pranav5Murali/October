@@ -5,18 +5,46 @@ on:
 
 jobs:
   connect-to-vm:
-    runs-on: [pranav-VirtualBox, self-hosted, Linux, X64]  # Ensure exact labels are matched
+    runs-on: [pranav-VirtualBox, self-hosted, Linux, X64]  # Ensure exact labels match
+
+    env:
+      SSH_USER: "pranav"
+      SSH_PASS: "Test@123"   # Update this with your actual password
+      SSH_HOST: "127.0.0.1"  # Update with your actual VM IP if different
+      SSH_PORT: "22"         # Default SSH port, change if necessary
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Verify sshpass installation
+        run: sshpass -V
 
-      - name: Check File Existence
+      - name: Check if actions-runner directory exists
         run: |
-          # Check if files in actions-runner directory exist
-          echo "Checking files in the repository..."
-          ls -la /home/pranav/actions-runner  # Adjust path if needed
+          echo "Verifying actions-runner directory..."
+          ls -la /home/pranav/actions-runner
 
-      - name: Logs will generate now
-        run: python3 /home/pranav/Documents/generate_logs.py  # Adjust this path if necessary
+      - name: Check if generate_logs.py exists
+        run: |
+          echo "Checking for generate_logs.py script..."
+          if [ -f /home/pranav/Documents/generate_logs.py ]; then
+            echo "File found!"
+          else
+            echo "Error: generate_logs.py not found."
+            exit 1
+          fi
+
+      - name: Make generate_logs.py executable
+        run: chmod +x /home/pranav/Documents/generate_logs.py
+
+      - name: Connect to VM and Execute Python Script
+        env:
+          SSH_PASS: ${{ secrets.SSH_PASS }}  # Store your password securely in GitHub secrets
+        run: |
+          echo "Connecting to Ubuntu VM..."
+          sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no \
+          -o UserKnownHostsFile=/dev/null \
+          -o LogLevel=ERROR \
+          $SSH_USER@$SSH_HOST -p $SSH_PORT \
+          'python3 /home/pranav/Documents/generate_logs.py'
