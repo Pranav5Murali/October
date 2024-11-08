@@ -16,19 +16,21 @@ jobs:
 
       - name: Connect and Run Command on VM
         env:
-          SSH_PASS: "Test@123"
+          SSH_PASS: ${{ secrets.SSH_PASS }}  # Securely fetch SSH password from GitHub secrets
+          RUNNER_IP: "192.168.1.3"  # Using the IP from your config.env
         run: |
           echo "Starting SSH connection..."
           sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no \
           -o UserKnownHostsFile=/dev/null \
           -o LogLevel=ERROR \
-          pranav@127.0.0.1 'echo "Connected to VM" && uname -a'
+          -o BatchMode=yes \
+          -o ConnectTimeout=5 \
+          pranav@$RUNNER_IP 'echo "Connected to VM" && uname -a'
 
       - name: Check File Existence
         run: |
           echo "Checking files in the repository..."
-          ls -la
-          ls -la path/to/generate_logs.py  # Adjust this path if necessary
+          ls -la /home/pranav/actions-runner  # Adjust path if needed
 
       - name: Logs will generate now
         run: python3 path/to/generate_logs.py  # Adjust this path if necessary
