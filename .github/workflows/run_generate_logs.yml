@@ -1,48 +1,57 @@
-name: Test Self-Hosted Runner and Generate Logs
+name: Generate Logs on Ubuntu VM
 
 on:
   workflow_dispatch:
 
 jobs:
-  # Step 1: Test Self-Hosted Runner
-  test-runner:
+  connect-to-vm:
     runs-on: self-hosted
 
-    steps:
-      - name: Test Runner Connection
-        run: |
-          echo "Testing runner connection..."
-          echo "Runner is working!"
-
-  # Step 2: Generate Logs with Python Script (Only if Step 1 succeeds)
-  generate-logs:
-    runs-on: [pranav-VirtualBox, self-hosted, Linux, X64]
-    needs: test-runner
+    env:
+      SSH_USER: "pranav"
+      SSH_PASS: "Test@123"
+      SSH_HOST: "127.0.0.1"  # Update if your VM IP is different
+      SSH_PORT: "22"         # Default SSH port
 
     steps:
-      # Step 2.1: Checkout Repository
+      # Step 1: Checkout Repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Step 2.2: Verify Python Installation
-      - name: Verify Python Installation
-        run: python3 --version
+      # Step 2: Verify sshpass Installation
+      - name: Verify sshpass installation
+        run: sshpass -V
 
-      # Step 2.3: Run Python Script to Generate File
-      - name: Run Python Script
+      # Step 3: Connect to VM and Run Python Script
+      - name: Connect and Run Command on VM
+        env:
+          SSH_PASS: ${{ secrets.SSH_PASS }}
         run: |
-          echo "Running generate_logs.py..."
+          echo "Starting SSH connection..."
+          sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no \
+          -o UserKnownHostsFile=/dev/null \
+          -o LogLevel=ERROR \
+          $SSH_USER@$SSH_HOST -p $SSH_PORT '
+          echo "Connected to VM"
+          cd /home/pranav/October
           python3 generate_logs.py
+          '
 
-      # Step 2.4: Move Generated File to /home/pranav
-      - name: Move Generated File to /home/pranav
+      # Step 4: Move Generated File to /home/pranav
+      - name: Move Generated File
+        env:
+          SSH_PASS: ${{ secrets.SSH_PASS }}
         run: |
-          echo "Checking if generated file exists..."
-          if [ -f generated_file.txt ]; then
-            echo "File found! Moving to /home/pranav..."
-            mv generated_file.txt /home/pranav/
+          echo "Moving generated file..."
+          sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no \
+          -o UserKnownHostsFile=/dev/null \
+          -o LogLevel=ERROR \
+          $SSH_USER@$SSH_HOST -p $SSH_PORT '
+          if [ -f /home/pranav/October/generated_file.txt ]; then
+            mv /home/pranav/October/generated_file.txt /home/pranav/
             echo "File moved successfully to /home/pranav"
           else
             echo "Error: generated_file.txt not found."
             exit 1
           fi
+          '
