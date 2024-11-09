@@ -1,57 +1,22 @@
-name: Generate Logs on Ubuntu VM
+name: Create File on Ubuntu VM
 
-on:
-  workflow_dispatch:
+on: [push]
 
 jobs:
-  connect-to-vm:
+  deploy:
     runs-on: self-hosted
-
-    env:
-      SSH_USER: "pranav"
-      SSH_PASS: "Test@123"
-      SSH_HOST: "127.0.0.1"  # Update if your VM IP is different
-      SSH_PORT: "22"         # Default SSH port
-
+    name: Create a file on Ubuntu VM via SSH
     steps:
-      # Step 1: Checkout Repository
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Verify sshpass Installation
-      - name: Verify sshpass installation
-        run: sshpass -V
-
-      # Step 3: Connect to VM and Run Python Script
-      - name: Connect and Run Command on VM
-        env:
-          SSH_PASS: ${{ secrets.SSH_PASS }}
-        run: |
-          echo "Starting SSH connection..."
-          sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no \
-          -o UserKnownHostsFile=/dev/null \
-          -o LogLevel=ERROR \
-          $SSH_USER@$SSH_HOST -p $SSH_PORT '
-          echo "Connected to VM"
-          cd /home/pranav/October
-          python3 generate_logs.py
-          '
-
-      # Step 4: Move Generated File to /home/pranav
-      - name: Move Generated File
-        env:
-          SSH_PASS: ${{ secrets.SSH_PASS }}
-        run: |
-          echo "Moving generated file..."
-          sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no \
-          -o UserKnownHostsFile=/dev/null \
-          -o LogLevel=ERROR \
-          $SSH_USER@$SSH_HOST -p $SSH_PORT '
-          if [ -f /home/pranav/October/generated_file.txt ]; then
-            mv /home/pranav/October/generated_file.txt /home/pranav/
-            echo "File moved successfully to /home/pranav"
-          else
-            echo "Error: generated_file.txt not found."
-            exit 1
-          fi
-          '
+      - name: Execute SSH command on Ubuntu VM
+        uses: appleboy/ssh-action@v0.1.9
+        with:
+          host: 192.168.1.100
+          username: pranav
+          password: Test@123
+          port: 22
+          script: |
+            echo "Hello from GitHub Actions" > /home/pranav/test_file.txt
+            ls -l /home/pranav/test_file.txt
